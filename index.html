@@ -4,18 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Artistic Protein Visualizer</title>
-    <link rel="stylesheet" href="styles.css">
+    <!-- Load Three.js from a CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.134.0/build/three.min.js"></script>
+    <!-- Load your main JavaScript module -->
+    <script type="module" src="main.js"></script>
 </head>
 <body>
-    <!-- Loading screen shown during initialization -->
-    <div id="loading-screen">
-        <h1>Loading...</h1>
-    </div>
-    <!-- Viewport for 3D canvas, hidden until loaded -->
-    <div id="viewport" style="display: none;">
-        <!-- Three.js canvas will be appended here -->
-    </div>
-    <!-- Main script loaded as an ES6 module -->
-    <script type="module" src="main.js"></script>
+    <div id="container"></div>
 </body>
 </html>
