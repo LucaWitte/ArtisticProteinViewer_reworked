@@ -1,8 +1,3 @@
-// utils/shaderManager.js
-
-/**
- * Manages shaders for protein visualization effects.
- */
 export class ShaderManager {
     constructor() {
         this.shaders = {};
@@ -32,7 +27,6 @@ export class ShaderManager {
                 }
             `
         };
-        // Add more shaders here as needed
     }
 
     applyShader(shaderName, mesh) {
