@@ -1,35 +1,26 @@
 // components/visualization/proteinRenderer.js
 
-/**
- * Manages protein visualization with Three.js.
- */
+import * as THREE from 'three';
+
 export class ProteinRenderer {
     constructor(container) {
         this.container = container;
-
-        // Initialize Three.js scene, camera, and renderer using the global THREE object
         this.scene = new THREE.Scene();
-        this.camera = new THREE.PerspectiveCamera(
-            75, // Field of view
-            container.clientWidth / container.clientHeight, // Aspect ratio
-            0.1, // Near clipping plane
-            1000 // Far clipping plane
-        );
-        this.renderer = new THREE.WebGLRenderer({ antialias: true });
+        this.camera = new THREE.PerspectiveCamera(75, container.clientWidth / container.clientHeight, 0.1, 1000);
+        this.renderer = new THREE.WebGLRenderer();
         this.renderer.setSize(container.clientWidth, container.clientHeight);
         container.appendChild(this.renderer.domElement);
         this.currentRepresentation = null;
 
-        // Position the camera
-        this.camera.position.z = 50;
+        // Add a placeholder cube to the scene
+        const geometry = new THREE.BoxGeometry(1, 1, 1); // A 1x1x1 cube
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 }); // Green color
+        this.currentRepresentation = new THREE.Mesh(geometry, material);
+        this.scene.add(this.currentRepresentation);
 
-        // Add lighting
-        const light = new THREE.DirectionalLight(0xffffff, 1);
-        light.position.set(0, 1, 1).normalize();
-        this.scene.add(light);
-        this.scene.add(new THREE.AmbientLight(0x404040));
+        // Position the camera to see the cube
+        this.camera.position.z = 5;
 
-        // Bind the animate method and start animation
         this.animate = this.animate.bind(this);
         this.animate();
     }
@@ -39,9 +30,8 @@ export class ProteinRenderer {
         this.renderer.render(this.scene, this.camera);
     }
 
-    // Placeholder for additional methods (e.g., updating visualization)
+    // Placeholder method for updating representation (to be implemented later)
     updateRepresentation(data) {
-        // Add logic to update the scene based on protein data
-        console.log('Updating representation with:', data);
+        console.log("Update representation with:", data);
     }
 }
