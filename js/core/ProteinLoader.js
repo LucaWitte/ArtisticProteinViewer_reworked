@@ -60,6 +60,7 @@ class ProteinLoader {
      */
     parsePDB(pdbText) {
         const pdbData = this.pdbLoader.parse(pdbText);
+        console.log("Raw PDBLoader output:", pdbData); // Let's see what we're getting
         // console.log("Raw PDBLoader output:", pdbData); // For debugging
 
         if (!pdbData || !pdbData.json || !pdbData.json.atoms) {
@@ -67,21 +68,29 @@ class ProteinLoader {
         }
 
         // Extract necessary information
-        const atoms = pdbData.json.atoms.map(atom => ({
-            serial: atom[0],
-            name: atom[1].trim(), // Atom name (e.g., 'CA', 'N', 'O')
-            altLoc: atom[2],     // Alternate location indicator
-            resName: atom[3],    // Residue name (e.g., 'GLY', 'ALA')
-            chainID: atom[4],    // Chain identifier
-            resSeq: atom[5],     // Residue sequence number
-            iCode: atom[6],      // Code for insertion of residues
-            x: atom[7],          // X coordinate
-            y: atom[8],          // Y coordinate
-            z: atom[9],          // Z coordinate
-            occupancy: atom[10],
-            tempFactor: atom[11],
-            element: atom[12].trim() // Element symbol (e.g., 'C', 'N', 'O')
-        }));
+        const atoms = pdbData.json.atoms.map(atom => {
+        // Skip invalid atoms
+        if (!atom || atom.length < 13) {
+            console.warn("Malformed atom entry:", atom);
+            return null;
+        }
+        
+        return {
+            serial: atom[0] || 0,
+            name: typeof atom[1] === 'string' ? atom[1].trim() : String(atom[1] || ''),
+            altLoc: atom[2] || '',
+            resName: atom[3] || '',
+            chainID: atom[4] || '',
+            resSeq: atom[5] || 0,
+            iCode: atom[6] || '',
+            x: atom[7] || 0,
+            y: atom[8] || 0,
+            z: atom[9] || 0,
+            occupancy: atom[10] || 0,
+            tempFactor: atom[11] || 0,
+            element: typeof atom[12] === 'string' ? atom[12].trim() : String(atom[12] || '')
+        };
+    }).filter(atom => atom !== null); // Remove any null atoms
 
         // Extract HELIX and SHEET records (adjust based on PDBLoader's output structure)
         // PDBLoader puts them directly in the json object
