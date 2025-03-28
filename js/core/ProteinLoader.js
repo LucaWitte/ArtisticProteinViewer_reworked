@@ -60,97 +60,56 @@ class ProteinLoader {
      */
     parsePDB(pdbText) {
         const pdbData = this.pdbLoader.parse(pdbText);
-        
-        console.log("Raw PDBLoader output structure:", {
-            hasGeometryAtoms: !!pdbData.geometryAtoms,
-            hasGeometryBonds: !!pdbData.geometryBonds,
-            hasJson: !!pdbData.json,
-            atomsCount: pdbData.json?.atoms?.length || 0
-        });
+        console.log("Raw PDBLoader output:", pdbData);
 
-        // Handle the case where direct access to atoms is needed
-        // PDBLoader stores atoms in json.atoms as [x, y, z, color, element]
+        if (!pdbData || !pdbData.json || !pdbData.json.atoms) {
+            throw new Error("Failed to parse PDB data or no atoms found.");
+        }
+
+        // Convert atom data from PDBLoader format to our required format
         const processedAtoms = [];
+        const pdbAtoms = pdbData.json.atoms;
         
-        if (pdbData.json && pdbData.json.atoms && pdbData.json.atoms.length > 0) {
-            // Convert atom data from PDBLoader format to our required format
-            for (let i = 0; i < pdbData.json.atoms.length; i++) {
-                const atom = pdbData.json.atoms[i];
-                
-                // Skip if atom is not in expected format
-                if (!atom || atom.length < 5) {
-                    console.warn("Skipping invalid atom:", atom);
-                    continue;
-                }
-
-                const x = atom[0];
-                const y = atom[1];
-                const z = atom[2];
-                const element = atom[4]; // Element symbol
-
-                processedAtoms.push({
-                    serial: i + 1,
-                    name: element,
-                    altLoc: '',
-                    resName: 'UNK', // Unknown residue name as default
-                    chainID: 'A',   // Default chain ID
-                    resSeq: i + 1,
-                    iCode: '',
-                    x: x,
-                    y: y,
-                    z: z,
-                    occupancy: 1.0,
-                    tempFactor: 0.0,
-                    element: element
-                });
-            }
-        } else {
-            // Alternative approach using the geometry data
-            if (pdbData.geometryAtoms) {
-                const positions = pdbData.geometryAtoms.getAttribute('position');
-                const colors = pdbData.geometryAtoms.getAttribute('color');
-                
-                if (positions && positions.count > 0) {
-                    for (let i = 0; i < positions.count; i++) {
-                        const x = positions.getX(i);
-                        const y = positions.getY(i);
-                        const z = positions.getZ(i);
-                        
-                        // We don't have element info from geometry, use position index
-                        const element = 'X'; // Default element when unknown
-                        
-                        processedAtoms.push({
-                            serial: i + 1,
-                            name: element,
-                            altLoc: '',
-                            resName: 'UNK',
-                            chainID: 'A',
-                            resSeq: i + 1,
-                            iCode: '',
-                            x: x,
-                            y: y,
-                            z: z,
-                            occupancy: 1.0,
-                            tempFactor: 0.0,
-                            element: element
-                        });
-                    }
-                }
-            }
+        console.log(`Found ${pdbAtoms.length} atoms in the PDB file`);
+        
+        // PDBLoader format: [x, y, z, colorArray, elementSymbol]
+        for (let i = 0; i < pdbAtoms.length; i++) {
+            const atom = pdbAtoms[i];
+            
+            // Extract data from PDBLoader format
+            const x = atom[0];
+            const y = atom[1];
+            const z = atom[2];
+            // atom[3] is the color array
+            const element = atom[4];
+            
+            // Create object in our required format
+            processedAtoms.push({
+                serial: i + 1,
+                name: element || 'X',
+                altLoc: '',
+                resName: 'UNK', // Placeholder for unknown residue
+                chainID: 'A',   // Default chain ID
+                resSeq: Math.floor(i / 10) + 1, // Group atoms into "residues" for visualization
+                iCode: '',
+                x: x,
+                y: y,
+                z: z,
+                occupancy: 1.0,
+                tempFactor: 0.0,
+                element: element || 'X'
+            });
         }
+        
+        console.log(`Successfully processed ${processedAtoms.length} atoms`);
 
-        // Handle no atoms case
-        if (processedAtoms.length === 0) {
-            console.warn("No atoms could be processed from the PDB data");
-        } else {
-            console.log(`Successfully processed ${processedAtoms.length} atoms`);
-        }
+        const helices = pdbData.json.helices || [];
+        const sheets = pdbData.json.sheets || [];
 
         return {
             atoms: processedAtoms,
-            helices: pdbData.json?.helices || [],
-            sheets: pdbData.json?.sheets || [],
-            // Include the original geometry data for visualization if needed later
+            helices: helices,
+            sheets: sheets,
             geometryAtoms: pdbData.geometryAtoms,
             geometryBonds: pdbData.geometryBonds
         };
