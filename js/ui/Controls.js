@@ -1,5 +1,5 @@
 // js/ui/Controls.js
-import { GUI } from '../vendor/dat.gui.module.js';
+const GUI = dat.GUI;
 
 class Controls {
     constructor(app) {
