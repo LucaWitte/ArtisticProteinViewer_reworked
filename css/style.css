@@ -1,0 +1,110 @@
+/* css/style.css */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden; /* Prevent scrollbars */
+    font-family: sans-serif;
+    background-color: #222; /* Default background */
+    color: #eee;
+}
+
+#viewer-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+canvas {
+    display: block; /* Remove potential bottom spacing */
+}
+
+/* dat.GUI will position itself, but we can style the container */
+#ui-controls {
+    position: absolute;
+    top: 10px;
+    left: 10px; /* Position dat.GUI controls area */
+    z-index: 10;
+}
+
+/* Basic styling for the custom file upload button */
+#file-loader {
+    margin-bottom: 10px; /* Space below upload button if using dat.GUI */
+}
+
+.custom-file-upload {
+    border: 1px solid #ccc;
+    display: inline-block;
+    padding: 6px 12px;
+    cursor: pointer;
+    background-color: #555;
+    color: #eee;
+    border-radius: 4px;
+    font-size: 0.9em;
+}
+
+.custom-file-upload:hover {
+    background-color: #777;
+}
+
+/* Loading Indicator Styles */
+#loading-indicator {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 8px;
+    display: flex; /* Use flexbox */
+    flex-direction: column; /* Stack spinner and text vertically */
+    align-items: center; /* Center items horizontally */
+    justify-content: center; /* Center items vertically */
+    z-index: 100;
+    text-align: center;
+}
+
+#loading-indicator span {
+    margin-top: 15px; /* Space between spinner and text */
+    font-size: 1.1em;
+}
+
+.spinner {
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    border-top: 4px solid #fff;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Style dat.GUI */
+.dg.main .close-button {
+    /* Adjust dat.GUI styling if needed */
+}
+.dg li:not(.folder) {
+    background: #333; /* Darker background for list items */
+    border-bottom: 1px solid #444;
+}
+.dg .cr.function:hover, .dg .cr.boolean:hover {
+     background: #444;
+}
+.dg {
+    color: #eee; /* Text color */
+    text-shadow: none !important;
+}
+.dg select {
+    color: #333; /* Dropdown text color */
+}
+.dg input[type=text] {
+    color: #333;
+}
