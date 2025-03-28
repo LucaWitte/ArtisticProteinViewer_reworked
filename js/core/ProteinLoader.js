@@ -60,57 +60,99 @@ class ProteinLoader {
      */
     parsePDB(pdbText) {
         const pdbData = this.pdbLoader.parse(pdbText);
-        console.log("Raw PDBLoader output:", pdbData); // Let's see what we're getting
-        // console.log("Raw PDBLoader output:", pdbData); // For debugging
-
-        if (!pdbData || !pdbData.json || !pdbData.json.atoms) {
-            throw new Error("Failed to parse PDB data or no atoms found.");
-        }
-
-        // Extract necessary information
-        const atoms = pdbData.json.atoms.map(atom => {
-        // Skip invalid atoms
-        if (!atom || atom.length < 13) {
-            console.warn("Malformed atom entry:", atom);
-            return null;
-        }
         
-        return {
-            serial: atom[0] || 0,
-            name: typeof atom[1] === 'string' ? atom[1].trim() : String(atom[1] || ''),
-            altLoc: atom[2] || '',
-            resName: atom[3] || '',
-            chainID: atom[4] || '',
-            resSeq: atom[5] || 0,
-            iCode: atom[6] || '',
-            x: atom[7] || 0,
-            y: atom[8] || 0,
-            z: atom[9] || 0,
-            occupancy: atom[10] || 0,
-            tempFactor: atom[11] || 0,
-            element: typeof atom[12] === 'string' ? atom[12].trim() : String(atom[12] || '')
-        };
-    }).filter(atom => atom !== null); // Remove any null atoms
+        console.log("Raw PDBLoader output structure:", {
+            hasGeometryAtoms: !!pdbData.geometryAtoms,
+            hasGeometryBonds: !!pdbData.geometryBonds,
+            hasJson: !!pdbData.json,
+            atomsCount: pdbData.json?.atoms?.length || 0
+        });
 
-        // Extract HELIX and SHEET records (adjust based on PDBLoader's output structure)
-        // PDBLoader puts them directly in the json object
-        const helices = pdbData.json.helices || [];
-        const sheets = pdbData.json.sheets || [];
+        // Handle the case where direct access to atoms is needed
+        // PDBLoader stores atoms in json.atoms as [x, y, z, color, element]
+        const processedAtoms = [];
+        
+        if (pdbData.json && pdbData.json.atoms && pdbData.json.atoms.length > 0) {
+            // Convert atom data from PDBLoader format to our required format
+            for (let i = 0; i < pdbData.json.atoms.length; i++) {
+                const atom = pdbData.json.atoms[i];
+                
+                // Skip if atom is not in expected format
+                if (!atom || atom.length < 5) {
+                    console.warn("Skipping invalid atom:", atom);
+                    continue;
+                }
 
-        // Simple validation
-        if (atoms.length === 0) {
-             console.warn("PDB parsed successfully, but no atoms were found in the JSON structure.");
-             // Don't throw an error yet, maybe it's an empty file or unusual format
+                const x = atom[0];
+                const y = atom[1];
+                const z = atom[2];
+                const element = atom[4]; // Element symbol
+
+                processedAtoms.push({
+                    serial: i + 1,
+                    name: element,
+                    altLoc: '',
+                    resName: 'UNK', // Unknown residue name as default
+                    chainID: 'A',   // Default chain ID
+                    resSeq: i + 1,
+                    iCode: '',
+                    x: x,
+                    y: y,
+                    z: z,
+                    occupancy: 1.0,
+                    tempFactor: 0.0,
+                    element: element
+                });
+            }
+        } else {
+            // Alternative approach using the geometry data
+            if (pdbData.geometryAtoms) {
+                const positions = pdbData.geometryAtoms.getAttribute('position');
+                const colors = pdbData.geometryAtoms.getAttribute('color');
+                
+                if (positions && positions.count > 0) {
+                    for (let i = 0; i < positions.count; i++) {
+                        const x = positions.getX(i);
+                        const y = positions.getY(i);
+                        const z = positions.getZ(i);
+                        
+                        // We don't have element info from geometry, use position index
+                        const element = 'X'; // Default element when unknown
+                        
+                        processedAtoms.push({
+                            serial: i + 1,
+                            name: element,
+                            altLoc: '',
+                            resName: 'UNK',
+                            chainID: 'A',
+                            resSeq: i + 1,
+                            iCode: '',
+                            x: x,
+                            y: y,
+                            z: z,
+                            occupancy: 1.0,
+                            tempFactor: 0.0,
+                            element: element
+                        });
+                    }
+                }
+            }
         }
 
+        // Handle no atoms case
+        if (processedAtoms.length === 0) {
+            console.warn("No atoms could be processed from the PDB data");
+        } else {
+            console.log(`Successfully processed ${processedAtoms.length} atoms`);
+        }
 
         return {
-            atoms: atoms,
-            helices: helices, // [ [chainId, initialResidue, initialICode, endResidue, endICode, helixClass, comment, length], ... ]
-            sheets: sheets    // [ [chainId, initialResidue, initialICode, endResidue, endICode, sense], ... ]
-            // Add geometryAtoms/geometryBonds if needed later:
-            // geometryAtoms: pdbData.geometryAtoms,
-            // geometryBonds: pdbData.geometryBonds
+            atoms: processedAtoms,
+            helices: pdbData.json?.helices || [],
+            sheets: pdbData.json?.sheets || [],
+            // Include the original geometry data for visualization if needed later
+            geometryAtoms: pdbData.geometryAtoms,
+            geometryBonds: pdbData.geometryBonds
         };
     }
 }
