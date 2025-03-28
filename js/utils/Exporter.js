@@ -1,5 +1,5 @@
 // js/utils/Exporter.js
-import { saveAs } from '../vendor/FileSaver.js'; // Assuming FileSaver.js exports 'saveAs'
+// import { saveAs } from '../vendor/FileSaver.js'; // Assuming FileSaver.js exports 'saveAs'
 
 class Exporter {
     /**
