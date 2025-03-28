@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Artistic Protein Visualizer</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="viewer-container">
+        <!-- Canvas will be inserted here by Three.js -->
+    </div>
+
+    <div id="ui-controls">
+        <!-- dat.GUI will attach here -->
+        <div id="file-loader">
+            <label for="pdbInput" class="custom-file-upload">Upload PDB</label>
+            <input type="file" id="pdbInput" accept=".pdb" style="display: none;">
+        </div>
+        <!-- Example loading might be integrated into dat.GUI -->
+    </div>
+
+    <div id="loading-indicator" style="display: none;">
+        <div class="spinner"></div>
+        <span>Loading...</span>
+    </div>
+
+    <!-- Import the main script as a module -->
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>
